@@ -1,0 +1,88 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Trucks</title>
+	<meta name="author" content="Maheswar Gunampally">
+	<!-- Date: 2013-03-02 -->
+	<script src='https://cdn.firebase.com/v0/firebase.js'></script>
+
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js'></script>
+    <link rel='stylesheet' type='text/css' href='../css/example.css'>
+</head>
+<body>
+	<div id='messagesDiv'></div>
+	
+	<table>
+		<tr><td>    <input type='text' id='truckname' placeholder='Truck Name' value='truck1'></td></tr>
+		<tr><td>    <input type='text' id='originZip' placeholder='Origin Zip'></td></tr>
+		<tr><td>    <input type='text' id='destZip' placeholder='Destination Zip'></td></tr>
+				<tr><td>    <input type='text' id='capweight' placeholder='Capacity Weight avail'></td></tr>
+	</table>
+    <script>
+
+
+	function go() {
+	  var userId = prompt('Enter TruckName:', 'Truck 1'); // truck name
+	  var userData = { name: userId };
+	  tryCreateUser(userId, userData);
+	}
+
+	var USERS_LOCATION = 'https://ubership-launch2013.firebaseio.com/trucks';
+	
+	function userCreated(userId, success) {
+	  if (!success) {
+	    alert('Truck ' + userId + ' already exists!');
+	  } else {
+	    alert('Successfully created ' + userId);
+	  }
+	}
+
+	// Tries to set /users/<userId> to the specified data, but only
+	// if there's no data there already.
+	function tryCreateUser(userId, userData) {
+	  var usersRef = new Firebase(USERS_LOCATION);
+	  usersRef.child(userId).transaction(function(currentUserData) {
+	    if (currentUserData === null)
+	      return userData;
+	  }, function(error, committed) {
+	    userCreated(userId, committed);
+	  });
+	}
+	go();
+
+      var myDataRef = new Firebase('https://ubership-launch2013.firebaseio.com/');
+//	  var mychild = myDataRef.child('trucks');
+	var mychild = myDataRef.child(userId);
+      $('#capweight').keypress(function (e) {
+        if (e.keyCode == 13) {
+          //var truckname = $('#truckname').val();
+          var originzip = $('#originZip').val();
+          var destzip = $('#destZip').val();
+	      var capweight = $('#capweight').val();
+          //myDataRef.set({truckname: truckname, originzip: originzip, destzip:destzip, capweight:capweight });
+			mychild.set({originzip: originzip, destzip:destzip, capweight:capweight });
+          $('#capweight').val('');
+        }
+      });
+      myDataRef.on('child_added', function(snapshot) {
+        var message = snapshot.val();
+        //displayChatMessage(message.truckname, message.originzip,message.destzip,message.capweight);
+		displayTrucks( message.originzip,message.destzip,message.capweight);
+      });
+      function displayChatMessage(name, text) {
+	
+        $('<div/>').text(text).prepend($('<em/>').text(name+': ')).appendTo($('#messagesDiv'));
+        $('#messagesDiv')[0].scrollTop = $('#messagesDiv')[0].scrollHeight;
+      };
+
+	function displayTrucks(origin,destination,capweight) {
+
+        $('<div/>').text(origin).prepend($('<em/>').text(origin+': ')).appendTo($('#messagesDiv'));
+        $('#messagesDiv')[0].scrollTop = $('#messagesDiv')[0].scrollHeight;
+      };
+    </script>
+
+</body>
+</html>
